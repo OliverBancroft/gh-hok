@@ -1,0 +1,13 @@
+.git
+.github
+.gitignore
+README.md
+**/node_modules
+**/.env
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
