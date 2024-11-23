@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,7 +14,7 @@ import (
 
 const (
 	sizeLimit = 1024 * 1024 * 1024 * 1 // 1GB
-	host      = "127.0.0.1"
+	host      = "0.0.0.0"
 	port      = 8080
 )
 
@@ -40,14 +38,9 @@ var (
 			MaxIdleConnsPerHost: 10,
 		},
 	}
-
-	blacklist = make(map[string]struct{})
 )
 
 func main() {
-	// 加载黑名单
-	loadBlacklist("blacklist.txt")
-
 	// 设置为发布模式
 	gin.SetMode(gin.ReleaseMode)
 
@@ -82,23 +75,6 @@ func main() {
 	}
 }
 
-func loadBlacklist(filename string) {
-	file, err := os.Open(filename)
-	if err != nil {
-		fmt.Printf("Warning: Could not load blacklist file: %v\n", err)
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		user := strings.TrimSpace(scanner.Text())
-		if user != "" && !strings.HasPrefix(user, "#") {
-			blacklist[user] = struct{}{}
-		}
-	}
-}
-
 func handler(c *gin.Context) {
 	rawPath := strings.TrimPrefix(c.Request.URL.RequestURI(), "/")
 	if rawPath == "" {
@@ -122,13 +98,9 @@ func handler(c *gin.Context) {
 	}
 
 	matched := false
-	var user string
 	for _, exp := range exps {
 		if match := exp.FindStringSubmatch(rawPath); match != nil {
 			matched = true
-			if len(match) > 1 {
-				user = match[1]
-			}
 			break
 		}
 	}
@@ -136,13 +108,6 @@ func handler(c *gin.Context) {
 	if !matched {
 		c.String(http.StatusForbidden, "Invalid GitHub URL format")
 		return
-	}
-
-	if user != "" {
-		if _, blocked := blacklist[user]; blocked {
-			c.String(http.StatusForbidden, "Access denied: User is blacklisted")
-			return
-		}
 	}
 
 	if exps[1].MatchString(rawPath) {
