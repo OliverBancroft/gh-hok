@@ -57,7 +57,7 @@ func main() {
 
 	// 主页路由
 	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "GitHub Proxy Service Running")
+		c.String(http.StatusOK, "Hello World")
 	})
 
 	// 健康检查路由

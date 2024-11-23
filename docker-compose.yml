@@ -1,0 +1,9 @@
+services:
+  proxy:
+    image: bancroftoliver23/gh-hok:latest
+    container_name: gh-hok
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:10821:8080"
+    environment:
+      - GIN_MODE=release
