@@ -13,10 +13,9 @@ RUN go mod download
 
 # 复制源代码
 COPY main.go .
-COPY blacklist.txt .
 
 # 构建
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o gh-hok
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o gh-hok
 
 # 使用 scratch 作为最终镜像
 FROM scratch
@@ -26,7 +25,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # 复制二进制文件和配置
 COPY --from=builder /app/gh-hok /
-COPY --from=builder /app/blacklist.txt /
+
 
 # 暴露端口
 EXPOSE 8080
